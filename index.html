@@ -12,8 +12,14 @@
 <meta property="og:title" content="Деловойс записывает задачи с рабочих встреч">
 <meta property="og:description" content="Деловойс слушает запись встречи и составляет список дел: что сделать, кто делает и когда дело должно быть готово.">
 <meta property="og:url" content="https://delovoice.ru/">
-<meta name="theme-color" content="#2c3b4d">
+<meta property="og:image" content="https://delovoice.ru/assets/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#fbedd4">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" as="image" type="image/webp" imagesrcset="assets/hero-wide-1100.webp 1100w, assets/hero-wide-1672.webp 1672w" imagesizes="100vw" media="(min-width: 901px)">
+<link rel="preload" as="image" type="image/webp" imagesrcset="assets/hero-tall-620.webp 620w, assets/hero-tall-941.webp 941w" imagesizes="100vw" media="(max-width: 900px)">
 <link rel="stylesheet" href="style.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Деловойс","alternateName":"Delovoice","url":"https://delovoice.ru/","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"ru","description":"Деловойс слушает запись рабочей встречи и составляет список дел: что нужно сделать, кто это делает и когда дело должно быть готово."}</script>
 <script>
@@ -35,9 +41,14 @@
 
 <main>
 
-<section class="hero wrap">
+<section class="hero" aria-labelledby="hero-title">
+  <picture class="hero-art">
+    <source media="(max-width: 900px)" type="image/webp" srcset="assets/hero-tall-620.webp 620w, assets/hero-tall-941.webp 941w" sizes="100vw">
+    <source type="image/webp" srcset="assets/hero-wide-1100.webp 1100w, assets/hero-wide-1672.webp 1672w" sizes="100vw">
+    <img src="assets/hero-wide-1672.jpg" alt="" width="1672" height="941" fetchpriority="high">
+  </picture>
   <div class="hero-text">
-    <h1>Деловойс записывает задачи с&nbsp;рабочих встреч</h1>
+    <h1 id="hero-title">Деловойс записывает задачи с&nbsp;рабочих встреч</h1>
     <div class="lead">
       <p>На работе люди встречаются и решают, что нужно сделать.</p>
       <p>Деловойс слушает запись встречи и составляет список дел. В списке видно:</p>
@@ -54,24 +65,6 @@
     </div>
     <p class="note">Пока мы проверяем работу сервиса, кабинет бесплатный. В примере показана придуманная компания.</p>
   </div>
-
-  <a href="demo.html" class="preview" aria-label="Нажмите, чтобы посмотреть, как работает кабинет">
-    <div class="preview-head">
-      <div><b>Компания «Северный ветер»</b><small>Так выглядит пример кабинета руководителя.</small></div>
-    </div>
-    <div class="preview-body">
-      <div class="preview-stats">
-        <div><strong>19</strong><b>Нужно сделать</b><small>Столько дел ещё не закончено.</small></div>
-        <div><strong class="danger">5</strong><b>Срок прошёл</b><small>Эти дела должны были сделать раньше.</small></div>
-        <div><strong>3</strong><b>Нужно уточнить</b><small>Программа не всё поняла. Решение должен принять человек.</small></div>
-      </div>
-      <h3>Какие дела нельзя забыть</h3>
-      <div class="preview-row"><span>Проверить, хорошо ли закреплена кабина дирижабля<small>Отвечает Аглая Ветрова</small></span><span class="chip red">Срок прошёл</span></div>
-      <div class="preview-row"><span>Проверить замки на складах с тросами и другим оборудованием<small>Отвечает Савва Кольцов</small></span><span class="chip red">Срок прошёл</span></div>
-      <div class="preview-row extra"><span>Узнать, привезли ли детали из алюминия<small>Отвечает Тихон Брагин</small></span><span class="chip red">Срок прошёл</span></div>
-      <p class="preview-cap">Нажмите, чтобы посмотреть, как работает кабинет</p>
-    </div>
-  </a>
 </section>
 
 <section class="block wrap" id="how">
