@@ -345,6 +345,17 @@ dialog::backdrop{background:rgba(27,38,50,.55);backdrop-filter:blur(2px)}
 .mini{min-height:32px;padding:0 10px;font-size:13px;margin-left:8px}
 .meet-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .sum-note{margin-top:12px}
+.sum-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:18px 0 6px}
+.kpi{background:var(--surface);border-radius:10px;padding:10px 12px}.kpi strong{display:block;font-size:24px;line-height:30px}.kpi span{font-size:12px;color:var(--ink-muted)}.kpi.late strong{color:var(--danger)}
+.chart{display:block;width:100%;height:auto;max-width:680px}
+.ch-grid{stroke:var(--line);stroke-width:1}.ch-base{stroke:var(--line-strong);stroke-width:1}
+.ch-ax{font:400 11px var(--f-sans);fill:var(--ink-muted)}.ch-val{font:500 11px var(--f-mono);fill:var(--ink)}
+.ch-end{font:600 11px var(--f-sans);fill:var(--ink)}.ch-end.late{fill:var(--danger)}
+.ch-legend,.st-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;margin:8px 0}.ch-legend i,.st-legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:6px}
+.st-bar{display:flex;gap:2px;height:16px;border-radius:4px;overflow:hidden;background:var(--surface)}.st-bar span{display:block;height:100%}
+.sum-table{font-size:13px}.sum-table th{padding:8px 12px}.sum-table td{padding:8px 12px}.late-n{color:var(--danger);font-weight:600}
+.sum-rank{margin:0;padding-left:20px}.sum-rank li{padding:6px 0;border-top:1px dashed var(--line)}.sum-rank li:first-child{border-top:0}.sum-rank span{display:block;font-size:13px;color:var(--ink-muted)}.sum-rank em{color:var(--danger);font-style:normal;font-weight:600}
+@media(max-width:760px){.sum-kpis{grid-template-columns:repeat(3,1fr)}}
 .sum-foot{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-muted)}
 @media(max-width:760px){button,.btn{white-space:normal;text-align:center;line-height:1.25;padding-top:8px;padding-bottom:8px}.intro{flex-direction:column;padding:16px}.date-pair{grid-template-columns:1fr}.summary-doc{padding:20px 18px}.sum-top{flex-direction:column;align-items:flex-start}.summary-doc>h2{font-size:21px}.field{max-width:none}}
 @media print{
@@ -354,7 +365,7 @@ body.printing .sidebar,body.printing .topbar,body.printing .scrim,body.printing 
 body.printing .shell{display:block}body.printing .main-shell{margin:0;border-radius:0;background:#fff}body.printing .workspace{padding:0;max-width:none}
 body.printing .summary-doc{border:0;border-radius:0;padding:0;max-width:none}
 body.printing .proof summary{display:none}body.printing .proof>div{margin-top:2px}
-body.printing .sum-list li{break-inside:avoid}body.printing .sum-sec h3{break-after:avoid}body.printing .sum-list a,body.printing .sum-list .mini{display:none}
+body.printing .sum-list li,body.printing .chart,body.printing .sum-kpis,body.printing .sum-table tr{break-inside:avoid}body.printing .table-wrap{overflow:visible}body.printing .sum-sec h3{break-after:avoid}body.printing .sum-list a,body.printing .sum-list .mini{display:none}
 body.printing a{color:inherit;text-decoration:none}body.printing .mini{display:none}
 }
 

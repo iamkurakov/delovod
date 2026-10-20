@@ -270,14 +270,15 @@ function showMeeting(id) {
 }
 
 /* ---------- итоги встреч ---------- */
-const PRESETS = {last:'Последняя встреча', today:'Сегодня', month:'За месяц', year:'За год'};
+const PRESETS = {last:'Последняя встреча', today:'Сегодня', week:'За неделю', month:'За месяц', year:'За год'};
 function presetRange(k) {
   if (k === 'today') return [TODAY, TODAY];
+  if (k === 'week') return ['2026-09-25', TODAY];
   if (k === 'month') return ['2026-09-02', TODAY];
   if (k === 'year') return ['2025-10-02', TODAY];
   return null;
 }
-const range = (f, t) => f.slice(0, 4) === t.slice(0, 4) ? `с ${date(f)} по ${fmt(t)}` : `с ${fmt(f)} по ${fmt(t)}`;
+const range = (f, t) => f === t ? `за ${fmt(f)}` : f.slice(0, 4) === t.slice(0, 4) ? `с ${date(f)} по ${fmt(t)}` : `с ${fmt(f)} по ${fmt(t)}`;
 const lastMeeting = () => meetings.slice().sort((a, b) => a.date < b.date ? 1 : -1)[0];
 const meetingsIn = (from, to) => meetings.filter(m => m.date >= from && m.date <= to).sort((a, b) => a.date < b.date ? -1 : 1);
 
@@ -345,6 +346,8 @@ function buildSummary(ids, single) {
       + (started.length ? sec('Что начали делать', list(started, x => `${esc(x.t.title)} — ${esc(x.t.owner)}.${proof(x)}`, '')) : '')
       + (done.length ? sec('Что уже сделали', list(done, doneLine, '')) : '')
       + sec('Что ещё нужно выяснить', list(questions, qLine, 'В этой встрече нет вопросов, которые нужно уточнять.'));
+  } else if (sum.from !== sum.to) {
+    [head, body] = buildAnalytic(ids, ms);
   } else {
     const touched = uniqByTask(all), open = touched.filter(x => !closed(x.t)), late = open.filter(x => over(x.t));
     const top = touched.map(x => ({x, k:all.filter(y => y.t.id === x.t.id).length})).sort((a, b) => b.k - a.k)[0];
@@ -370,6 +373,105 @@ function buildSummary(ids, single) {
     : `<button class="primary" data-action="pdf">Сохранить в PDF</button><button data-action="sum-again">Выбрать другие дни</button><button data-action="sum-rebuild">Сделать итоги заново</button>`;
   return `<div class="summary-actions actions">${actions}</div><p class="small muted pdf-hint">«Сохранить в PDF» откроет окно печати. Выберите в нём «Сохранить как PDF».</p>
   <article class="summary-doc" id="summary-doc"><header class="sum-top"><img src="assets/logo-dark.png" alt="Деловойс" width="150" height="15"><span>Итоги встреч · Компания «Северный ветер» · пример на придуманных данных</span></header>${head}${body}<footer class="sum-foot">Итоги собраны 1 октября 2026 года в ${built}. Деловойс · delovoice.ru</footer></article>`;
+}
+
+
+/* ---------- аналитический отчёт за период больше одного дня ---------- */
+const C_NEW = '#2f6fae', C_DONE = '#b5532f', C_OPEN = '#2c3b4d', C_LATE = '#a1283f';
+const DAY = 864e5, dnum = s => Date.parse(s + 'T12:00:00'), iso = n => new Date(n).toISOString().slice(0, 10);
+const createdAt = t => t.events[0]?.date;
+const closedAt = t => t.events.find(e => e.kind === 'Выполнение подтверждено')?.date;
+const openAt = (t, d) => t.status !== 'Отменена' && createdAt(t) <= d && !(closedAt(t) && closedAt(t) <= d);
+const lateAt = (t, d) => openAt(t, d) && t.due && t.due < d;
+function buckets(from, to) {
+  const span = (dnum(to) - dnum(from)) / DAY, out = [];
+  if (span <= 14) { for (let n = dnum(from); n <= dnum(to); n += DAY) { const d = iso(n); out.push({from:d, to:d, label:dshort(d).replace('.', '')}); } }
+  else if (span <= 92) { let n = dnum(from); while (n <= dnum(to)) { const end = Math.min(n + 6 * DAY, dnum(to)); out.push({from:iso(n), to:iso(end), label:dshort(iso(n)).replace('.', '') + '–' + new Date(end).getDate()}); n = end + DAY; } }
+  else { let d = new Date(dnum(from)); d.setDate(1); while (iso(+d) <= to) { const f = iso(+d), e = new Date(d.getFullYear(), d.getMonth() + 1, 0, 12); out.push({from:f < from ? from : f, to:iso(+e) > to ? to : iso(+e), label:d.toLocaleDateString('ru-RU', {month:'short'}).replace('.', '') + (d.getMonth() === 0 ? ' ' + d.getFullYear() : '')}); d = new Date(d.getFullYear(), d.getMonth() + 1, 1, 12); } }
+  return out;
+}
+const NARROW = () => window.innerWidth < 600 && !document.body.classList.contains('printing');
+function barChart(bk) {
+  const W = NARROW() ? 360 : 640, H = 230, L = 34, R = 8, T = 24, B = 34, max = Math.max(1, ...bk.flatMap(b => [b.nw, b.dn]));
+  const step = (W - L - R) / bk.length, bw = Math.max(4, Math.min(22, step / 2 - 4)), y = v => T + (H - T - B) * (1 - v / max);
+  const ticks = [0, Math.round(max / 2), max].filter((v, i, a) => a.indexOf(v) === i);
+  const lab = (v, x, yy) => v ? `<text x="${x}" y="${yy - 5}" text-anchor="middle" class="ch-val">${v}</text>` : '';
+  const showLab = bk.length <= 12, xEvery = Math.ceil(bk.length / (W < 500 ? 5 : 10));
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Новые и закрытые задания по ${bk.length > 1 ? 'периодам' : 'дням'}">
+    ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="ch-grid"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" class="ch-ax">${v}</text>`).join('')}
+    ${bk.map((b, i) => { const cx = L + step * i + step / 2, x1 = cx - bw - 1, x2 = cx + 1;
+      return `<g><title>${b.label}: новых ${b.nw}, закрыли ${b.dn}</title>
+        ${b.nw ? `<rect x="${x1}" y="${y(b.nw)}" width="${bw}" height="${y(0) - y(b.nw)}" rx="3" fill="${C_NEW}"/>` : ''}
+        ${b.dn ? `<rect x="${x2}" y="${y(b.dn)}" width="${bw}" height="${y(0) - y(b.dn)}" rx="3" fill="${C_DONE}"/>` : ''}
+        ${showLab ? lab(b.nw, x1 + bw / 2, y(b.nw)) + lab(b.dn, x2 + bw / 2, y(b.dn)) : ''}
+        ${i % xEvery === 0 || i === bk.length - 1 ? `<text x="${cx}" y="${H - 12}" text-anchor="middle" class="ch-ax">${b.label}</text>` : ''}</g>`; }).join('')}
+    <line x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}" class="ch-base"/></svg>
+    <div class="ch-legend"><span><i style="background:${C_NEW}"></i>Новые задания</span><span><i style="background:${C_DONE}"></i>Закрыли</span></div>`;
+}
+function lineChart(bk) {
+  const W = NARROW() ? 360 : 640, H = 210, L = 34, R = 70, T = 18, B = 34, max = Math.max(1, ...bk.flatMap(b => [b.op, b.lt]));
+  const step = bk.length > 1 ? (W - L - R) / (bk.length - 1) : 0, x = i => bk.length > 1 ? L + step * i : (L + W - R) / 2, y = v => T + (H - T - B) * (1 - v / max);
+  const ticks = [0, Math.round(max / 2), max].filter((v, i, a) => a.indexOf(v) === i);
+  const line = (k, c) => `<polyline fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" points="${bk.map((b, i) => x(i) + ',' + y(b[k])).join(' ')}"/>${bk.map((b, i) => `<circle cx="${x(i)}" cy="${y(b[k])}" r="4" fill="${c}" stroke="#fff" stroke-width="2"><title>${b.label}: ${k === 'op' ? 'открыто' : 'срок прошёл'} ${b[k]}</title></circle>`).join('')}`;
+  const last = bk[bk.length - 1], every = Math.ceil(bk.length / (W < 500 ? 4 : 8));
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Сколько дел было открыто и сколько опаздывало">
+    ${ticks.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="ch-grid"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" class="ch-ax">${v}</text>`).join('')}
+    ${line('op', C_OPEN)}${line('lt', C_LATE)}
+    <text x="${x(bk.length - 1) + 10}" y="${y(last.op) + 4}" class="ch-end">${last.op} открыто</text>
+    <text x="${x(bk.length - 1) + 10}" y="${y(last.lt) + (Math.abs(y(last.lt) - y(last.op)) < 14 ? 16 : 4)}" class="ch-end late">${last.lt} опоздали</text>
+    ${bk.map((b, i) => i % every === 0 || i === bk.length - 1 ? `<text x="${x(i)}" y="${H - 12}" text-anchor="middle" class="ch-ax">${b.label}</text>` : '').join('')}</svg>
+    <div class="ch-legend"><span><i style="background:${C_OPEN}"></i>Ещё не готово</span><span><i style="background:${C_LATE}"></i>Срок прошёл</span></div>`;
+}
+function statusBar(list) {
+  const groups = [['Готово', 'var(--success)'], ['Сейчас делают', 'var(--info)'], ['Ещё не начали', 'var(--oatmeal)'], ['Срок прошёл', 'var(--danger)'], ['Нужно спросить', 'var(--warning)'], ['Отменили', 'var(--line-strong)']]
+    .map(([g, c]) => ({g, c, n:list.filter(t => label(t) === g).length})).filter(x => x.n);
+  const tot = Math.max(1, list.length);
+  return `<div class="st-bar" role="img" aria-label="Состояние дел">${groups.map(x => `<span style="width:${x.n / tot * 100}%;background:${x.c}" title="${x.g}: ${x.n}"></span>`).join('')}</div>
+    <div class="st-legend">${groups.map(x => `<span><i style="background:${x.c}"></i>${x.g} — <b>${x.n}</b> (${Math.round(x.n / tot * 100)}%)</span>`).join('')}</div>`;
+}
+function groupTable(keys, keyOf, head) {
+  return `<div class="table-wrap"><table class="sum-table"><thead><tr><th>${head}</th><th>Новых</th><th>Закрыли</th><th>Ещё не готово</th><th>Срок прошёл</th></tr></thead><tbody>${keys.map(k => {
+    const ts = tasks.filter(t => keyOf(t) === k), nw = ts.filter(t => createdAt(t) >= sum.from && createdAt(t) <= sum.to).length, dn = ts.filter(t => closedAt(t) && closedAt(t) >= sum.from && closedAt(t) <= sum.to).length, op = ts.filter(t => openAt(t, END())).length, lt = ts.filter(t => lateAt(t, END())).length;
+    return `<tr><td>${esc(k)}</td><td class="num">${nw}</td><td class="num">${dn}</td><td class="num">${op}</td><td class="num ${lt ? 'late-n' : ''}">${lt}</td></tr>`; }).join('')}</tbody></table></div>`;
+}
+const END = () => sum.to > TODAY ? TODAY : sum.to;
+function buildAnalytic(ids, ms) {
+  const first = ms[0].date, from = sum.from < first ? first : sum.from, end = END();
+  const inP = d => d && d >= sum.from && d <= sum.to;
+  const bk = buckets(from, end).map(b => ({...b,
+    nw:tasks.filter(t => createdAt(t) >= b.from && createdAt(t) <= b.to).length,
+    dn:tasks.filter(t => closedAt(t) && closedAt(t) >= b.from && closedAt(t) <= b.to).length,
+    op:tasks.filter(t => openAt(t, b.to)).length, lt:tasks.filter(t => lateAt(t, b.to)).length}));
+  const created = tasks.filter(t => inP(createdAt(t))), done = tasks.filter(t => inP(closedAt(t)));
+  const open = tasks.filter(t => openAt(t, end)), late = tasks.filter(t => lateAt(t, end));
+  const moves = collect(ids).filter(x => x.e.kind === 'Перенос срока'), backs = collect(ids).filter(x => x.e.kind === 'Проблема вернулась');
+  const questions = reviews.filter(q => ids.includes(q.meeting));
+  const age = t => Math.round((dnum(end) - dnum(createdAt(t))) / DAY);
+  const oldest = open.slice().sort((a, b) => age(b) - age(a) || b.mentions - a.mentions).slice(0, 5);
+  const deptLate = departments.map(d => [d, late.filter(t => t.dept === d).length]).sort((a, b) => b[1] - a[1])[0];
+  const pct = created.length ? Math.round(done.filter(t => inP(createdAt(t))).length / created.length * 100) : 0;
+  const n = (k, a, b, c) => `${k} ${plural(k, a, b, c)}`;
+  const main = [
+    `За период прошло ${n(ms.length, 'встреча', 'встречи', 'встреч')}. Поставили ${n(created.length, 'новое задание', 'новых задания', 'новых заданий')}, закрыли ${n(done.length, 'дело', 'дела', 'дел')}.`,
+    `Из новых заданий за этот же период закрыто ${pct}%.`,
+    `На ${date(end)} ещё не готово ${n(open.length, 'дело', 'дела', 'дел')}, у ${late.length} срок уже прошёл.`,
+    deptLate && deptLate[1] ? `Больше всего опозданий — в отделе «${deptLate[0]}»: ${deptLate[1]}.` : '',
+    oldest[0] ? `Дольше всего не закрыто «${esc(oldest[0].title)}» — ${n(age(oldest[0]), 'день', 'дня', 'дней')}.` : ''
+  ].filter(Boolean).join(' ');
+  const kpi = (v, l, cls = '') => `<div class="kpi ${cls}"><strong class="num">${v}</strong><span>${l}</span></div>`;
+  const head = `<h2>Отчёт ${range(sum.from, sum.to)}</h2><p>Как двигались дела за это время: что поставили, что закрыли, где опаздывают. Мы посмотрели ${n(ms.length, 'встречу', 'встречи', 'встреч')}.</p>`;
+  const body = `<div class="sum-kpis">${kpi(ms.length, 'встреч')}${kpi(created.length, 'новых заданий')}${kpi(done.length, 'закрыли')}${kpi(open.length, 'ещё не готово')}${kpi(late.length, 'срок прошёл', 'late')}${kpi(moves.length, 'переносов срока')}</div>`
+    + sec('Самое главное', `<p>${main}</p>`)
+    + sec('Новые и закрытые задания', barChart(bk) + `<p class="small muted">${bk.length > 1 ? 'Каждая пара столбиков — ' + (bk[0].from === bk[0].to ? 'один день' : (dnum(bk[0].to) - dnum(bk[0].from)) / DAY <= 7 ? 'одна неделя' : 'один месяц') + '.' : ''} Если синий столбик выше рыжего, дел прибавляется быстрее, чем их закрывают.</p>`)
+    + sec('Сколько дел висело', lineChart(bk) + `<p class="small muted">Число дел, которые ещё не готовы, на конец каждого ${bk[0].from === bk[0].to ? 'дня' : 'отрезка'}. Красная линия — те из них, у которых срок уже прошёл.</p>`)
+    + sec('В каком состоянии дела сейчас', statusBar(tasks.filter(t => createdAt(t) <= end)))
+    + sec('Как идут дела по отделам', groupTable(departments, t => t.dept, 'Отдел'))
+    + sec('Как идут дела у сотрудников', groupTable(Object.values(people), t => t.owner, 'Кто делает'))
+    + sec('Дольше всего не закрыты', oldest.length ? `<ol class="sum-rank">${oldest.map(t => `<li><b>${esc(t.title)}</b><span>${esc(owner(t))} · открыто ${n(age(t), 'день', 'дня', 'дней')} · говорили ${n(t.mentions, 'раз', 'раза', 'раз')}${over(t) ? ' · <em>срок прошёл</em>' : ''}</span></li>`).join('')}</ol>` : '<p class="muted">Открытых дел нет.</p>')
+    + sec('Переносы сроков и вернувшиеся проблемы', `<p>Сроки переносили ${n(moves.length, 'раз', 'раза', 'раз')}. ${backs.length ? `Вернулось ${n(backs.length, 'проблема', 'проблемы', 'проблем')}: ${backs.map(x => '«' + esc(x.t.title) + '»').join(', ')}.` : 'Старые проблемы не возвращались.'}</p>`)
+    + sec('Что нужно уточнить', questions.length ? `<p>Без точного ответа ${n(questions.length, 'вопрос', 'вопроса', 'вопросов')}: ${questions.map(q => esc(q.title.replace(/\?$/, ''))).join('; ')}. <a href="#review">Ответить</a></p>` : '<p class="muted">Вопросов без ответа нет.</p>')
+    + `<p class="small muted sum-note">${from > sum.from ? `Встречи в кабинете начались ${date(from)}, поэтому графики начинаются с этого дня. ` : ''}Срок у задания берётся последний названный. Состояние дел — на ${date(end)}${end === TODAY ? ' (в этом примере сегодня)' : ''}.</p>`;
+  return [head, body];
 }
 
 function runSummary(single, ids) {
