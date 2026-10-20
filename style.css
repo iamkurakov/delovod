@@ -350,45 +350,50 @@ body.printing a{color:inherit;text-decoration:none}body.printing .mini{display:n
 @media(max-width:760px){.cards{grid-template-columns:1fr}.shell{display:block}.sidebar{display:none;width:280px;max-width:86vw;z-index:5;background:var(--surface)}.shell.menu-open .sidebar{display:flex}.shell.menu-open .scrim{display:block;position:fixed;inset:0;z-index:4;background:rgba(27,38,50,.55)}.menu-close{display:inline-flex}.main-shell{width:auto;margin:0;border-radius:0}.topbar{height:64px;padding:0 16px}.topbar .muted,.topbar-right .username{display:none}.menu-toggle{display:inline-flex;padding:0 12px}.workspace{padding:20px 16px}.page-title{align-items:start;flex-wrap:wrap}.page-title h1{font-size:22px;line-height:28px}.metrics{gap:8px}.metric{padding:14px}.metric strong{font-size:26px;line-height:30px}.banner{padding:20px;align-items:start;flex-direction:column}.calendar-grid{grid-template-columns:repeat(7,minmax(92px,1fr));min-width:644px}.calendar-wrap{overflow:auto}.steps{grid-template-columns:1fr 1fr}.meet-card{flex-direction:column;align-items:start;gap:14px}.detail-meta{grid-template-columns:1fr 1fr}.modal-head,.modal-body{padding:20px}.date-controls{flex-wrap:wrap}.toolbar select{flex:1}.topbar-right{gap:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 
-/* ===== титул: иллюстрация и текст ===== */
-:root{--sky:#fbedd4;--sky-tall:#f7e6c6;--edge:clamp(32px,calc((100vw - 1260px) / 2 + 32px),140px)}
+/* ===== титул: иллюстрация и текст =====
+   Широкая картинка: свободное небо — левые ~42% ширины и верхние ~72% высоты.
+   Текст укладывается в этот прямоугольник вёрсткой: ширина колонки считается от размера картинки,
+   кегль — от ширины и высоты экрана, строки заголовка заданы. Подложек под текстом нет. */
+:root{--sky:#fbedd4;--sky-tall:#f6e5c3;--edge:clamp(32px,calc((100vw - 1260px) / 2 + 32px),140px);
+  --hero-h:clamp(720px,100vh,1040px);--art-w:max(100vw,calc(var(--hero-h) * 1.777))}
 .site-nav{position:absolute;top:0;left:0;right:0;z-index:3;max-width:none;padding:0 var(--edge)}
-.site-nav .btn:not(.primary){background:rgba(251,237,212,.82)}
-.site-nav .nav-link{padding:8px 12px;border-radius:8px;background:rgba(251,237,212,.82)}
-.site-nav nav{gap:12px}
-.hero{position:relative;isolation:isolate;background:var(--sky);min-height:clamp(720px,100vh,1040px);display:flex;align-items:center;
-  padding:112px var(--edge) clamp(56px,9vh,110px);overflow:hidden}
-.hero-art{position:absolute;inset:0;z-index:-2}
+
+.hero{position:relative;isolation:isolate;background:var(--sky);min-height:var(--hero-h);display:flex;align-items:flex-start;
+  padding:clamp(112px,15vh,168px) var(--edge) clamp(230px,30vh,320px);overflow:hidden}
+.hero-art{position:absolute;inset:0;z-index:-1}
 .hero-art img{width:100%;height:100%;object-fit:cover;object-position:0 62%;display:block}
-.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(90deg,rgba(251,237,212,.95) 0,rgba(251,237,212,.9) 33%,rgba(251,237,212,.55) 46%,rgba(251,237,212,0) 58%)}
-.hero-text{position:relative;width:min(580px,41vw)}
-@media(min-width:1600px){.hero-text{width:min(660px,36vw)}}
-.hero h1{margin:0 0 22px;font-size:clamp(32px,3.5vw,54px);line-height:1.08;overflow-wrap:break-word;hyphens:auto}
-.hero .lead{font-size:17px;line-height:1.55;color:#4d5664;max-width:none}
-.hero .lead p{margin-bottom:8px}
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
-.hero .btn:not(.primary){background:rgba(251,237,212,.7);border-color:#8c8576}
-.hero .btn:not(.primary):hover{background:#f3dfbf}
-.hero .note{color:#4d5664;max-width:480px}
-.hero .lead,.hero .note{text-shadow:0 0 8px rgba(251,237,212,.9),0 0 2px rgba(251,237,212,.9)}
+.hero-text{position:relative;width:min(560px,calc(var(--art-w) * .42 - var(--edge) - 28px))}
+.hero h1{margin:0 0 clamp(20px,3vh,30px);font-size:min(3vw,5.2vh,48px);line-height:1.04;letter-spacing:-.025em}
+.hero h1 span{display:block;white-space:nowrap}
+.hero .lead{font-size:clamp(15px,1.85vh,17px);line-height:1.5;color:var(--ink-muted);max-width:none;text-wrap:pretty}
+.hero .lead p{margin-bottom:.45em}
+.hero ul.dash{margin:0 0 .45em}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:clamp(18px,2.8vh,28px)}
+.hero .note{font-size:12.5px;line-height:1.45;margin-top:12px;max-width:44ch;text-wrap:pretty}
+
+/* меню: на широком экране ссылки рядом с логотипом, на небе; справа только главная кнопка */
+@media(min-width:901px){
+.site-nav{justify-content:flex-start}
+.site-nav nav{flex:1;margin-left:clamp(32px,4vw,64px);gap:28px}
+.site-nav nav .btn:not(.primary){border:0;padding:0;min-height:0;background:none;font-size:14px}
+.site-nav nav .btn:not(.primary):hover{background:none;color:var(--action)}
+.site-nav .nav-cta{margin-left:auto}
+}
 
 /* телефон и планшет: текст сверху на небе, рисунок под ним */
 @media(max-width:900px){
 .hero{flex-direction:column;align-items:stretch;min-height:0;padding:96px 0 0;background:var(--sky-tall)}
-.hero::before{display:none}
-.hero-text{order:1;width:auto;padding:0 var(--edge);z-index:1}
+.hero-text{order:1;width:auto;max-width:680px;padding:0 var(--edge);z-index:1}
 .hero-art{order:2;position:relative;inset:auto;z-index:0;margin-top:calc(-100vw * 1672 / 941 * .27);
-  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%);mask-image:linear-gradient(180deg,transparent 0,#000 16%)}
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%);mask-image:linear-gradient(180deg,transparent 0,#000 18%)}
 .hero-art img{height:auto;object-fit:fill}
-.hero h1{font-size:clamp(30px,6.4vw,44px)}
-.hero-text{max-width:680px}
+.hero h1{font-size:min(6.9vw,44px);line-height:1.08}
+.hero .lead{font-size:16px}
 }
 @media(min-width:641px) and (max-width:900px){.hero-art{margin-top:calc(-100vw * 1672 / 941 * .32)}}
 @media(max-width:640px){
 .site-nav{padding:0 20px}
 .hero{padding-top:84px}
 .hero-text{padding:0 20px}
-.hero .lead{font-size:16px}
-.hero-actions .btn{flex:1}
+.hero-actions .btn{flex:1;padding:0 12px}
 }
