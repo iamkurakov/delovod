@@ -1,1 +1,146 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Деловойс — аналитика планёрок</title><meta name="description" content="Деловойс превращает обсуждения в управленческие действия: поручения, сроки и ответственные из записей планёрок, без ручного ввода. Интерактивное демо на вымышленных данных."><meta name="theme-color" content="#2c3b4d"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"></head><body><div id="app"></div><div id="toast" role="status" aria-live="polite"></div><dialog id="detail"><div id="detailbody"></div></dialog><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Деловойс — поручения с планёрок в одном реестре</title>
+<meta name="description" content="Поручения, сроки и ответственные из записей планёрок. У каждой записи — цитата с таймкодом. Невыполненное возвращается в повестку. Бета: кабинет бесплатно.">
+<link rel="canonical" href="https://delovoice.ru/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Деловойс">
+<meta property="og:title" content="Деловойс — поручения с планёрок в одном реестре">
+<meta property="og:description" content="Поручения, сроки и ответственные из записей планёрок. У каждой записи — цитата с таймкодом.">
+<meta property="og:url" content="https://delovoice.ru/">
+<meta name="theme-color" content="#2c3b4d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Деловойс","alternateName":"Delovoice","url":"https://delovoice.ru/","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"ru","description":"Сервис превращает записи планёрок в реестр поручений: задача, ответственный, срок, статус. У каждой записи — цитата с таймкодом."}</script>
+<script>
+/* старые адреса вида delovoice.ru/#login или #overview вели в демо — переадресуем */
+(function(h){var keep={home:1,how:1,product:1,pricing:1,features:'product',presentation:'how'};if(!h)return;if(keep[h]){if(typeof keep[h]==='string')location.replace('#'+keep[h]);return;}location.replace('demo.html#'+(h==='login'?'overview':h));})(location.hash.slice(1));
+</script>
+</head>
+<body class="site">
+
+<header class="site-nav">
+  <a href="/" class="brand" aria-label="Деловойс — на главную"><img src="assets/logo-dark.png" alt="Деловойс" width="190" height="19"></a>
+  <nav aria-label="Основное меню">
+    <a href="#pricing" class="nav-link">Цены</a>
+    <a href="demo.html" class="nav-link">Демо</a>
+    <a href="https://app.delovoice.ru/#in" class="btn">Войти</a>
+    <a href="https://app.delovoice.ru/" class="btn primary nav-cta">Создать кабинет</a>
+  </nav>
+</header>
+
+<main>
+
+<section class="hero wrap">
+  <div class="hero-text">
+    <h1>Поручения с&nbsp;планёрок — в&nbsp;одном реестре</h1>
+    <p class="lead">Запишите планёрку — Деловойс выпишет поручения, сроки и ответственных. У каждой записи — цитата и время на записи. Невыполненное вернётся в повестку следующей встречи.</p>
+    <div class="hero-actions">
+      <a href="https://app.delovoice.ru/" class="btn primary">Создать кабинет</a>
+      <a href="demo.html" class="btn">Посмотреть демо</a>
+    </div>
+    <p class="note">Бета: кабинет бесплатно. Демо — на вымышленной верфи.</p>
+  </div>
+
+  <a href="demo.html" class="preview" aria-label="Открыть демо кабинета">
+    <div class="preview-head">
+      <div><b>Верфь «Северный ветер»</b><small>Кабинет руководителя · демо</small></div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-stats">
+        <div><strong>19</strong><small>Открыто</small></div>
+        <div><strong class="danger">5</strong><small>Просрочено</small></div>
+        <div><strong>3</strong><small>На проверке</small></div>
+      </div>
+      <h3>Вернуть в повестку</h3>
+      <div class="preview-row"><span>Проверить крепление гондолы перед пробным подъёмом<small>Аглая Ветрова</small></span><span class="chip red">Просрочена</span></div>
+      <div class="preview-row"><span>Проверить замки складов такелажа<small>Савва Кольцов</small></span><span class="chip red">Просрочена</span></div>
+      <div class="preview-row extra"><span>Проверить поставку алюминиевого профиля<small>Тихон Брагин</small></span><span class="chip red">Просрочена</span></div>
+    </div>
+  </a>
+</section>
+
+<section class="block wrap" id="how">
+  <h2>Как это работает</h2>
+  <ol class="steps-row">
+    <li><b>Запись</b>На телефон, петличку, микрофон переговорной или прямо в кабинете.</li>
+    <li><b>Расшифровка</b>Текст с таймкодами и разметкой по говорящим.</li>
+    <li><b>Разбор</b>Поручения, сроки и ответственные. У каждой записи — цитата.</li>
+    <li><b>Контроль</b>Реестр, просрочки и повестка следующей планёрки.</li>
+  </ol>
+  <p class="aside">Первая запись — знакомство: участники называют имя и зону ответственности. Дальше планёрка идёт как обычно.</p>
+</section>
+
+<section class="block wrap" id="product">
+  <div class="product">
+    <div class="product-text">
+      <h2>Что видит руководитель</h2>
+      <p class="lead">Задача не закрывается по молчанию. Срок и исполнитель появляются, только если их назвали вслух.</p>
+      <dl class="points">
+        <div><dt>Сроки словами</dt><dd>«Завтра» и «к пятнице» становятся датами по производственному календарю. «На днях» остаётся без срока.</dd></div>
+        <div><dt>История темы</dt><dd>Одна тема через все встречи: что пробовали и когда проблема вернулась.</dd></div>
+        <div><dt>Цитата и проверка</dt><dd>Без цитаты в реестр ничего не попадает. Спорное — в очередь проверки руководителю.</dd></div>
+        <div><dt>Повестка и исполнение</dt><dd>Перед планёркой — просрочки, сроки дня и то, о чём молчат две недели. Исполнение по службам и людям.</dd></div>
+      </dl>
+      <a href="demo.html" class="btn">Посмотреть демо</a>
+    </div>
+
+    <figure class="task-card" aria-label="Карточка поручения в кабинете, демо">
+      <figcaption class="num">T-002 · Хозяйственная служба</figcaption>
+      <h3>Восстановить ворот причальной мачты № 2</h3>
+      <div class="task-meta">
+        <div><small>Ответственный</small>Савва Кольцов</div>
+        <div><small>Срок</small><span class="num">3 окт.</span></div>
+        <div><small>Статус</small><span class="chip">В работе</span></div>
+      </div>
+      <ol class="task-history">
+        <li>
+          <span class="num muted">24 сент. · Поручение поставлено</span>
+          <q>Савва Кольцов, поручаю: восстановить ворот причальной мачты № 2. Срок — 30 сентября.</q>
+          <small class="num">Марк Остроухов · 00:04:12</small>
+        </li>
+        <li>
+          <span class="num muted">1 окт. · Перенос срока</span>
+          <q>Подшипник поставили. Проверка под нагрузкой — до 3 октября.</q>
+          <small class="num">Савва Кольцов · 00:02:18</small>
+        </li>
+      </ol>
+    </figure>
+  </div>
+</section>
+
+<section class="block wrap" id="pricing">
+  <h2>Цены</h2>
+  <p class="lead">Сейчас бета — кабинет бесплатно. Ниже — ориентир после беты, не публичная оферта.</p>
+  <div class="prices">
+    <div class="price"><h3>Пакет № 1</h3><strong class="num">20 000 ₽</strong><span>в месяц · 20 планёрок</span></div>
+    <div class="price"><h3>Пакет № 2</h3><strong class="num">50 000 ₽</strong><span>в месяц · 70 планёрок</span></div>
+    <div class="price"><h3>Пакет № 3</h3><strong class="num">70 000 ₽</strong><span>в месяц · 100 планёрок</span></div>
+  </div>
+  <p class="aside">Планёрка — любая встреча до часа: выездная, совещание, рабочая встреча.</p>
+</section>
+
+<section class="wrap">
+  <div class="cta">
+    <div><h2>Начните с одной планёрки</h2><p>Регистрация — две минуты. Первую встречу можно записать прямо в кабинете.</p></div>
+    <a href="https://app.delovoice.ru/" class="btn accent-btn">Создать кабинет</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <a href="/" class="brand" aria-label="Деловойс — на главную"><img src="assets/logo-dark.png" alt="Деловойс" width="160" height="16"></a>
+    <p>ИП Ломоносова-Тайшина Анна Сергеевна · ИНН 222111661216 · ОГРНИП 323220200018128<br>
+    <a href="mailto:civilgorod@gmail.com">civilgorod@gmail.com</a> · <a href="/privacy.html">Политика обработки персональных данных</a><br>
+    В демо — вымышленная верфь «Северный ветер».</p>
+  </div>
+</footer>
+
+</body>
+</html>
